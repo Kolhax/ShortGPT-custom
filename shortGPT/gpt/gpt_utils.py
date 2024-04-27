@@ -6,7 +6,7 @@ from time import sleep, time
 import openai
 import tiktoken
 import yaml
-
+from g4f.client import Client
 from shortGPT.config.api_db import ApiKeyManager
 
 
@@ -74,32 +74,33 @@ def gpt3Turbo_completion(chat_prompt="", system="You are an AI that can give the
     openai.base_url = "http://192.168.0.102:3040/v1/"
     max_retry = 5
     retry = 0
+    client = Client()
     while True:
-        #try:
-        if conversation:
-            messages = conversation
-        else:
-            messages = [
-                {"role": "system", "content": system},
-                {"role": "user", "content": chat_prompt}
-            ]
-        response = openai.chat.completions.create(
-            model=model,
-            messages=messages,
-            max_tokens=max_tokens,
-            temperature=temp)
-        text = response.choices[0].message.content.strip()
-        if remove_nl:
-            text = re.sub('\s+', ' ', text)
-        filename = '%s_gpt3.txt' % time()
-        if not os.path.exists('.logs/gpt_logs'):
-            os.makedirs('.logs/gpt_logs')
-        with open('.logs/gpt_logs/%s' % filename, 'w', encoding='utf-8') as outfile:
-            outfile.write(f"System prompt: ===\n{system}\n===\n"+f"Chat prompt: ===\n{chat_prompt}\n===\n" + f'RESPONSE:\n====\n{text}\n===\n')
-        return text
-        #except Exception as oops:
-        #    retry += 1
-        #    if retry >= max_retry:
-        #        raise Exception("GPT3 error: %s" % oops)
-        #    print('Error communicating with OpenAI:', oops)
-        #    sleep(1)
+        try:
+            if conversation:
+                messages = conversation
+            else:
+                messages = [
+                    {"role": "system", "content": system},
+                    {"role": "user", "content": chat_prompt}
+                ]
+            response = client.chat.completions.create(
+                model=model,
+                messages=messages,
+                max_tokens=max_tokens,
+                temperature=temp)
+            text = response.choices[0].message.content.strip()
+            if remove_nl:
+                text = re.sub('\s+', ' ', text)
+            filename = '%s_gpt3.txt' % time()
+            if not os.path.exists('.logs/gpt_logs'):
+                os.makedirs('.logs/gpt_logs')
+            with open('.logs/gpt_logs/%s' % filename, 'w', encoding='utf-8') as outfile:
+                outfile.write(f"System prompt: ===\n{system}\n===\n"+f"Chat prompt: ===\n{chat_prompt}\n===\n" + f'RESPONSE:\n====\n{text}\n===\n')
+            return text
+        except Exception as oops:
+            retry += 1
+            if retry >= max_retry:
+                raise Exception("GPT3 error: %s" % oops)
+            print('Error communicating with OpenAI:', oops)
+            sleep(1)

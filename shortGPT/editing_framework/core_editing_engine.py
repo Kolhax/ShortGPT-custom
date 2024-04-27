@@ -193,11 +193,21 @@ class CoreEditingEngine:
     # Process individual asset types
     def process_video_asset(self, asset: Dict[str, Any]) -> VideoFileClip:
         params = {
-            'filename': handle_path(asset['parameters']['url'])
+            'filename': asset['parameters']['url']
         }
         if 'audio' in asset['parameters']:
             params['audio'] = asset['parameters']['audio']
-        clip = VideoFileClip(**params)
+        #Check url is https then download file to temp file first
+        if params['filename'].startswith('https'):
+            import requests
+            import tempfile
+            temp_file = tempfile.NamedTemporaryFile(delete=False)
+            temp_file.write(requests.get(params['filename']).content)
+            params['filename'] = temp_file.name
+            clip = VideoFileClip(**params)
+            temp_file.close()
+        else:
+            clip = VideoFileClip(**params)
         return self.process_common_visual_actions(clip, asset['actions'])
 
     def process_image_asset(self, asset: Dict[str, Any]) -> ImageClip:

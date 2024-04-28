@@ -1,4 +1,4 @@
-# 🚀🎬 ShortGPT 
+# 🚀🎬 ShortGPT WITH GPT4FREE
 ## (Note: ShortX is out, a paid premium automation factory with more capabilities than ShortGPT, check it out at [shortx.ai](https://shortx.ai?ref=sgpt))
 <p align="center">
   <a href="https://discord.gg/uERx39ru3R">

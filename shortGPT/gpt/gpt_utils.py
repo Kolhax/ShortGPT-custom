@@ -3,10 +3,11 @@ import os
 import re
 from time import sleep, time
 
-import openai
+#import openai
+from g4f.client import Client
 import tiktoken
 import yaml
-from g4f.client import Client
+
 from shortGPT.config.api_db import ApiKeyManager
 
 
@@ -70,11 +71,9 @@ def open_file(filepath):
 
 
 def gpt3Turbo_completion(chat_prompt="", system="You are an AI that can give the answer to anything", temp=0.7, model="gpt-3.5-turbo", max_tokens=1000, remove_nl=True, conversation=None):
-    openai.api_key = "anything"
-    openai.base_url = "http://192.168.0.102:3040/v1/"
+    #openai.api_key = ApiKeyManager.get_api_key("OPENAI")
     max_retry = 5
     retry = 0
-    client = Client()
     while True:
         try:
             if conversation:
@@ -84,11 +83,10 @@ def gpt3Turbo_completion(chat_prompt="", system="You are an AI that can give the
                     {"role": "system", "content": system},
                     {"role": "user", "content": chat_prompt}
                 ]
+            client = Client()
             response = client.chat.completions.create(
                 model=model,
-                messages=messages,
-                max_tokens=max_tokens,
-                temperature=temp)
+                messages=messages)
             text = response.choices[0].message.content.strip()
             if remove_nl:
                 text = re.sub('\s+', ' ', text)
